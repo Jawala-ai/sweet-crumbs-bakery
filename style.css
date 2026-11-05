@@ -1,0 +1,165 @@
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background: #fff8f0;
+    color: #49302c;
+}
+
+header {
+    background: #e8b7a5;
+    text-align: center;
+    padding: 50px 20px;
+}
+
+header h1 {
+    font-size: 36px;
+    margin-bottom: 10px;
+}
+
+header p {
+    font-size: 17px;
+}
+
+/* Practice-project notice: page-level, so it sits outside <main> */
+.notice {
+    width: calc(100% - 40px);
+    max-width: 760px;
+    margin: 24px auto 0;
+    padding: 14px 18px;
+    background-color: #f6ece4;
+    border-left: 4px solid #a34e36;
+    border-radius: 6px;
+    font-size: 15px;
+    line-height: 1.5;
+}
+
+.notice strong {
+    color: #a34e36;
+}
+
+.menu {
+    padding: 40px 8%;
+    text-align: center;
+}
+
+.menu h2 {
+    font-size: 28px;
+    margin-bottom: 30px;
+}
+
+.menu-container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 25px;
+}
+
+.item {
+    background: white;
+    padding: 15px;
+    border-radius: 12px;
+    box-shadow: 0 3px 12px #00000015;
+}
+
+.item img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 10px;
+}
+
+.item h3 {
+    margin: 12px 0;
+}
+
+.item p {
+    color: #a34e36;
+    font-weight: bold;
+}
+
+.contact {
+    background: #e8b7a5;
+    text-align: center;
+    padding: 35px 15px;
+}
+
+.contact h2 {
+    margin-bottom: 15px;
+}
+
+.contact p {
+    margin: 10px;
+}
+
+/* WhatsApp button: base look */
+.contact .btn-whatsapp {
+    display: inline-block;
+    margin-top: 15px;
+    padding: 12px 22px;
+    background-color: #287d48;
+    color: #ffffff;
+    text-decoration: none;
+    border-radius: 25px;
+    transition: background-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+/* Hover only where a real pointer exists, so phones do not keep
+   the "hovered" look after a tap. */
+@media (hover: hover) {
+    .contact .btn-whatsapp:hover {
+        background-color: #1f6238;
+        box-shadow: 0 4px 10px #00000026;
+        transform: translateY(-2px);
+    }
+}
+
+/* Pressed state */
+.contact .btn-whatsapp:active {
+    transform: translateY(0);
+    box-shadow: none;
+}
+
+/* Keyboard focus only: 3px dark-brown ring, held away from the button.
+   Never remove the outline without a replacement like this. */
+.contact .btn-whatsapp:focus-visible {
+    outline: 3px solid #49302c;
+    outline-offset: 3px;
+}
+
+/* Respect the operating system's "reduce motion" setting */
+@media (prefers-reduced-motion: reduce) {
+    .contact .btn-whatsapp {
+        transition: none;
+    }
+
+    .contact .btn-whatsapp:hover,
+    .contact .btn-whatsapp:active {
+        transform: none;
+    }
+}
+
+footer {
+    text-align: center;
+    padding: 20px;
+}
+
+@media (max-width: 650px) {
+    .menu-container {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    header h1 {
+        font-size: 28px;
+    }
+}
+
+@media (max-width: 400px) {
+    .menu-container {
+        grid-template-columns: 1fr;
+    }
+}
