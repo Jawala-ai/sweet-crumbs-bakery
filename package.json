@@ -4,7 +4,8 @@
   "description": "**Practice project, not a real bakery.** This site is a demo built by a web development intern; no orders are processed.",
   "main": "script.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
   },
   "repository": {
     "type": "git",

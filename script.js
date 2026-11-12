@@ -1,73 +1,50 @@
-const products = [
-    {
-        id: 1,
-        name: "Chocolate Cake",
-        price: 1200,
-        category: "cakes",
-        image: "https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=600&h=400&q=75"
-    },
-    {
-        id: 2,
-        name: "Vanilla Cupcakes",
-        price: 500,
-        category: "cupcakes",
-        image: "https://images.unsplash.com/photo-1486427944299-d1955d23e34d?auto=format&fit=crop&w=600&h=400&q=75"
-    },
-    {
-        id: 3,
-        name: "Chocolate Brownies",
-        price: 350,
-        category: "brownies",
-        image: "https://images.unsplash.com/photo-1606313564200-e75d5e30476c?auto=format&fit=crop&w=600&h=400&q=75"
-    },
-    {
-        id: 4,
-        name: "Sweet Donuts",
-        price: 300,
-        category: "donuts",
-        image: "https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?auto=format&fit=crop&w=600&h=400&q=75"
-    },
-    {
-        id: 5,
-        name: "Chocolate Cookies",
-        price: 250,
-        category: "cookies",
-        image: "https://images.unsplash.com/photo-1499636136210-6f4ee915583e?auto=format&fit=crop&w=600&h=400&q=75"
-    },
-    {
-        id: 6,
-        name: "Birthday Cake",
-        price: 1500,
-        category: "cakes",
-        image: "https://images.unsplash.com/photo-1464349095431-e9a21285b5f3?auto=format&fit=crop&w=600&h=400&q=75"
-    }
-];
+let products = [];
+let cart = JSON.parse(localStorage.getItem("cart")) || [];
+
 const menuContainer = document.getElementById("menu-container");
+const searchInput = document.getElementById("search-input");
+const categoryFilter = document.getElementById("category-filter");
+
+async function loadProducts() {
+    menuContainer.textContent = "Loading products...";
+
+    try {
+        const response = await fetch("/api/products");
+
+        if (!response.ok) {
+            throw new Error("Could not load products");
+        }
+
+        products = await response.json();
+
+        displayProducts(products);
+    } catch (error) {
+        console.error(error);
+        menuContainer.textContent = "Unable to load products. Please refresh.";
+    }
+}
 
 function displayProducts(productList) {
     menuContainer.innerHTML = "";
 
     productList.forEach(function(product) {
         const card = document.createElement("article");
-
         card.className = "item";
 
         card.innerHTML = `
             <img src="${product.image}" alt="${product.name}" loading="lazy">
             <h3>${product.name}</h3>
             <p>Rs. ${product.price}</p>
-            <button type="button" onclick="addToCart(${product.id})">
-                Add to Cart
-            </button>
+            ${
+                product.sold_out
+                ? "<p>Sold Out</p>"
+                : `<button type="button" onclick="addToCart(${product.id})">Add to Cart</button>`
+            }
         `;
 
         menuContainer.appendChild(card);
     });
 }
-
-displayProducts(products);
-const searchInput = document.getElementById("search-input");
-const categoryFilter = document.getElementById("category-filter");
 
 function filterProducts() {
     const searchText = searchInput.value.toLowerCase();
@@ -84,46 +61,21 @@ function filterProducts() {
 
     displayProducts(filteredProducts);
 }
-searchInput.addEventListener("input",filterProducts);
-categoryFilter.addEventListener("change",filterProducts);
-let cart = JSON.parse(localStorage.getItem("cart")) || [];
+
+searchInput.addEventListener("input", filterProducts);
+categoryFilter.addEventListener("change", filterProducts);
 
 function addToCart(productId) {
-    const product = products.find(function(item) {
-        return item.id === productId;
-    });
+    const product = products.find(item => item.id === productId);
 
-    const existingItem = cart.find(function(item) {
-        return item.id === productId;
-    });
+    if (!product || product.sold_out) return;
+
+    const existingItem = cart.find(item => item.id === productId);
 
     if (existingItem) {
         existingItem.quantity++;
     } else {
-        cart.push({
-            ...product,
-            quantity: 1
-        });
-    }
-
-    displayCart();
-}
-function addToCart(productId) {
-    const product = products.find(function(item) {
-        return item.id === productId;
-    });
-
-    const existingItem = cart.find(function(item) {
-        return item.id === productId;
-    });
-
-    if (existingItem) {
-        existingItem.quantity++;
-    } else {
-        cart.push({
-            ...product,
-            quantity: 1
-        });
+        cart.push({ ...product, quantity: 1 });
     }
 
     displayCart();
@@ -141,7 +93,7 @@ function displayCart() {
     }
 
     cart.forEach(function(item) {
-        const itemTotal = item.price * item.quantity;
+        const itemTotal = Number(item.price) * item.quantity;
         total += itemTotal;
 
         const div = document.createElement("div");
@@ -159,12 +111,11 @@ function displayCart() {
     });
 
     cartTotal.textContent = total;
-    localStorage.setItem("cart",JSON.stringify(cart));
+    localStorage.setItem("cart", JSON.stringify(cart));
 }
+
 function changeQuantity(productId, change) {
-    const item = cart.find(function(product) {
-        return product.id === productId;
-    });
+    const item = cart.find(product => product.id === productId);
 
     if (item) {
         item.quantity += change;
@@ -178,10 +129,58 @@ function changeQuantity(productId, change) {
 }
 
 function removeFromCart(productId) {
-    cart = cart.filter(function(item) {
-        return item.id !== productId;
-    });
-
+    cart = cart.filter(item => item.id !== productId);
     displayCart();
 }
+
 displayCart();
+loadProducts();
+
+// Submit customer order to the database
+document.getElementById("checkout-form").addEventListener("submit", async function(event) {
+    event.preventDefault();
+
+    const message = document.getElementById("checkout-message");
+
+    if (cart.length === 0) {
+        message.textContent = "Your cart is empty!";
+        return;
+    }
+
+    const orderData = {
+        customer_name: document.getElementById("customer-name").value.trim(),
+        phone: document.getElementById("customer-phone").value.trim(),
+        address: document.getElementById("customer-address").value.trim(),
+        items: cart.map(item => ({
+            product_id: item.id,
+            quantity: item.quantity
+        }))
+    };
+
+    message.textContent = "Placing your order...";
+
+    try {
+        const response = await fetch("/api/orders", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(orderData)
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+            throw new Error(result.error || "Order failed.");
+        }
+
+        message.textContent = "Order successful! Your order number is #" + result.order_id;
+
+        cart = [];
+        displayCart();
+        document.getElementById("checkout-form").reset();
+
+    } catch (error) {
+        message.textContent = error.message;
+    }
+});

@@ -56,7 +56,17 @@
 
     <h3>Total: Rs. <span id="cart-total">0</span></h3>
 </section> 
-    <section class="contact" aria-labelledby="contact-heading">
+    <section class="checkout">
+    <h2>Checkout</h2>
+    <form id="checkout-form">
+        <input type="text" id="customer-name" placeholder="Your full name" required>
+        <input type="tel" id="customer-phone" placeholder="Phone number" required>
+        <textarea id="customer-address" placeholder="Delivery address" required></textarea>
+        <button type="submit">Place Order</button>
+    </form>
+    <p id="checkout-message"></p>
+</section>
+<section class='contact' aria-labelledby="contact-heading">
         <h2 id="contact-heading">Visit Us</h2>
         <p>Location: Mithi, Sindh, Pakistan</p>
         <p>Opening Hours: 9 AM – 8 PM</p>
